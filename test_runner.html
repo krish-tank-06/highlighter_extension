@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Multi Highlight Extension — Test Suite & Live Demo</title>
+  <link rel="stylesheet" href="src/highlight.css">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --success: #22c55e;
+      --error: #ef4444;
+      --warn: #eab308;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+      min-height: 100vh;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand img {
+      width: 38px;
+      height: 38px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-success { background: rgba(34, 197, 94, 0.2); color: var(--success); border: 1px solid var(--success); }
+    .badge-info { background: rgba(56, 189, 248, 0.2); color: var(--primary); border: 1px solid var(--primary); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Test Results */
+    .test-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.6);
+      font-size: 14px;
+    }
+    .test-status {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .status-pass { color: var(--success); }
+    .status-fail { color: var(--error); }
+    .test-desc { flex: 1; }
+    .test-name { font-weight: 600; color: #fff; }
+    .test-detail { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+
+    /* Interactive Simulator */
+    .popup-sim {
+      background: #f1f5f9;
+      color: #1e293b;
+      border-radius: 8px;
+      padding: 16px;
+      max-width: 440px;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4);
+    }
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .popup-header h3 { font-size: 18px; font-weight: 700; color: #334155; }
+    .popup-textarea {
+      width: 100%;
+      min-height: 100px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 14px;
+      line-height: 1.4;
+      resize: vertical;
+      margin-bottom: 12px;
+      outline: none;
+    }
+    .popup-textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+    .control-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .delim-input {
+      width: 32px;
+      text-align: center;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 2px 4px;
+      font-weight: bold;
+      background: #e2e8f0;
+    }
+    .kw-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+    .kw-chip {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .kw-chip:hover { opacity: 0.85; }
+    .kw-chip .del { font-weight: bold; font-size: 14px; }
+
+    /* Reading Document Area */
+    .document-area {
+      background: #ffffff;
+      color: #1e293b;
+      padding: 24px;
+      border-radius: 8px;
+      line-height: 1.7;
+      font-size: 15px;
+      height: 480px;
+      overflow-y: auto;
+    }
+    .document-area h2 { font-size: 20px; margin-bottom: 12px; color: #0f172a; }
+    .document-area p { margin-bottom: 16px; }
+
+    .test-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .btn {
+      background: var(--primary);
+      color: #0f172a;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-secondary { background: var(--border); color: #fff; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <img src="src/img/logo38.png" alt="Multi Highlight Logo">
+      <div>
+        <h1 style="font-size: 22px;">Multi Highlight Extension Test Suite</h1>
+        <p style="color: var(--text-muted); font-size: 13px;">Automated Core Validation & Interactive Playground</p>
+      </div>
+    </div>
+    <div>
+      <span id="overallBadge" class="badge badge-info">Running Tests...</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- Automated Unit/Integration Tests -->
+    <div class="card">
+      <div class="card-title">
+        <span>Automated Verification Suite</span>
+        <button id="runTestsBtn" class="btn btn-secondary" style="font-size: 12px; padding: 4px 10px;">Re-run Tests</button>
+      </div>
+      <div id="testResultsList">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+
+    <!-- Live Extension Playground -->
+    <div class="card">
+      <div class="card-title">
+        <span>Extension Pop-up Simulator</span>
+        <span class="badge badge-info">Interactive</span>
+      </div>
+
+      <div class="popup-sim">
+        <div class="popup-header">
+          <h3>Multi Highlight</h3>
+          <div style="font-size: 12px; color: #64748b;">
+            <label style="cursor: pointer;"><input type="checkbox" id="simToggle" checked> Enabled</label>
+          </div>
+        </div>
+
+        <textarea id="simInput" class="popup-textarea" placeholder="Type keywords separated by comma (e.g., Chrome, web, performance, fast)">Chrome, web, performance, fast</textarea>
+
+        <div class="controls-grid">
+          <label class="control-label">
+            Word Separator:
+            <input type="text" id="simDelim" class="delim-input" value="," maxlength="1">
+          </label>
+          <label class="control-label">
+            <input type="checkbox" id="simRealtime" checked> Real-time Highlight
+          </label>
+          <label class="control-label">
+            <input type="checkbox" id="simWholeWord"> Match Whole Word
+          </label>
+          <label class="control-label">
+            <input type="checkbox" id="simMatchCase"> Match Case
+          </label>
+          <label class="control-label">
+            <input type="checkbox" id="simNewlineColor"> Newline Colors
+          </label>
+          <label class="control-label">
+            <button id="simClearBtn" style="background:#e2e8f0; border:1px solid #cbd5e1; padding:2px 8px; border-radius:4px; font-size:11px; cursor:pointer;">Clear All</button>
+          </label>
+        </div>
+
+        <div>
+          <div style="font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Active Keyword Chips (Click to remove):</div>
+          <div id="simChips" class="kw-chips"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Target Document View -->
+  <div class="card">
+    <div class="card-title">
+      <span>Target Web Page Sandbox (Live Highlighted Content)</span>
+      <div style="display:flex; gap:8px;">
+        <button id="addDynamicContentBtn" class="btn" style="font-size: 12px; padding: 4px 10px;">Inject Dynamic Text</button>
+        <button id="resetDocBtn" class="btn btn-secondary" style="font-size: 12px; padding: 4px 10px;">Reset Text</button>
+      </div>
+    </div>
+
+    <div id="docContent" class="document-area">
+      <h2>Exploring Modern Web Browser Extensions & Highlight Performance</h2>
+      <p>
+        Google Chrome and Microsoft Edge provide rich extension APIs that empower web users to enhance their browsing experience. 
+        When reviewing complex research papers, legal documents, or fast-paced articles on the web, finding multiple concepts simultaneously is essential.
+      </p>
+      <p>
+        The Multi Highlight browser extension allows users to specify multiple search keywords, each assigned an eye-friendly distinctive color. 
+        Unlike standard browser search (Ctrl+F) which only focuses on one single term at a time, Multi Highlight performs instant real-time scanning across the entire DOM tree without breaking layout or underlying node structures.
+      </p>
+      <p>
+        Whether evaluating JavaScript performance, comparing web frameworks, or reading fast technical documentation, grouping keywords by newline or comma delimiter unlocks tremendous reading speed. 
+        It supports whole word boundaries, case sensitive queries, and auto-rehighlighting through HTML5 MutationObservers.
+      </p>
+      <div id="dynamicContainer"></div>
+    </div>
+  </div>
+
+  <div id="sandboxHost" style="display:none;"></div>
+
+  <!-- Load Extension Dependencies -->
+  <script src="src/jquery/jquery.js"></script>
+  <script src="src/jquery/jquery.highlight.js"></script>
+
+  <script>
+    // --- Automated Unit / Integration Test Engine ---
+    const tests = [
+      {
+        name: "Test 1: Core Highlighting & Custom Tag Injection",
+        run: () => {
+          const $host = $("#sandboxHost").empty().html("<p>Welcome to Google Chrome browser</p>");
+          $host.highlight("Chrome", { className: "chrome-extension-FindManyStrings chrome-extension-FindManyStrings-style-0 CE-FMS-Chrome", element: "mh" });
+          const $mh = $host.find("mh");
+          if ($mh.length !== 1) throw new Error("Expected 1 <mh> tag, got " + $mh.length);
+          if (!$mh.hasClass("chrome-extension-FindManyStrings-style-0")) throw new Error("Missing style-0 class");
+          if ($mh.text() !== "Chrome") throw new Error("Highlight text mismatch: " + $mh.text());
+          return "Injected 1 <mh> tag with style-0 class and correct text";
+        }
+      },
+      {
+        name: "Test 2: Multi-Keyword Assignment & Color Grouping",
+        run: () => {
+          const $host = $("#sandboxHost").empty().html("<p>Red green blue yellow red green</p>");
+          $host.highlight("red", { className: "chrome-extension-FindManyStrings chrome-extension-FindManyStrings-style-0 CE-FMS-red", element: "mh" });
+          $host.highlight("green", { className: "chrome-extension-FindManyStrings chrome-extension-FindManyStrings-style-1 CE-FMS-green", element: "mh" });
+          $host.highlight("blue", { className: "chrome-extension-FindManyStrings chrome-extension-FindManyStrings-style-2 CE-FMS-blue", element: "mh" });
+          
+          const redCount = $host.find(".chrome-extension-FindManyStrings-style-0").length;
+          const greenCount = $host.find(".chrome-extension-FindManyStrings-style-1").length;
+          const blueCount = $host.find(".chrome-extension-FindManyStrings-style-2").length;
+
+          if (redCount !== 2 || greenCount !== 2 || blueCount !== 1) {
+            throw new Error(`Color counts incorrect: red=${redCount}, green=${greenCount}, blue=${blueCount}`);
+          }
+          return `Successfully highlighted 3 keywords with distinct color classes (style-0: ${redCount}, style-1: ${greenCount}, style-2: ${blueCount})`;
+        }
+      },
+      {
+        name: "Test 3: Case-Sensitivity Toggling",
+        run: () => {
+          const $host = $("#sandboxHost").empty().html("<p>Apple apple APPLE aPple</p>");
+          // Case-sensitive search for "apple"
+          $host.highlight("apple", { className: "CE-FMS-apple", element: "mh", caseSensitive: true });
+          const exactCount = $host.find("mh").length;
+          if (exactCount !== 1) throw new Error("Expected 1 exact case match, got " + exactCount);
+
+          // Clear and try case-insensitive
+          $host.unhighlight({ className: "CE-FMS-apple", element: "mh" });
+          $host.highlight("apple", { className: "CE-FMS-apple", element: "mh", caseSensitive: false });
+          const allCount = $host.find("mh").length;
+          if (allCount !== 4) throw new Error("Expected 4 insensitive matches, got " + allCount);
+
+          return `Case sensitivity verified (Exact: 1, Insensitive: 4)`;
+        }
+      },
+      {
+        name: "Test 4: Match Whole Word Boundaries",
+        run: () => {
+          const $host = $("#sandboxHost").empty().html("<p>The cat in caterpillar and catnap</p>");
+          $host.highlight("cat", { className: "CE-FMS-cat", element: "mh", wordsOnly: true });
+          const matches = $host.find("mh").length;
+          if (matches !== 1) throw new Error("Expected 1 whole-word match for 'cat', got " + matches);
+          return "Whole-word boundary correctly isolated standalone 'cat'";
+        }
+      },
+      {
+        name: "Test 5: Delimiter Splitting & Parser Logic",
+        run: () => {
+          const delim = ",";
+          const input = "alpha, beta, gamma, delta";
+          const parsed = input.split(delim).map(s => s.trim()).filter(s => s.length > 0);
+          if (parsed.length !== 4 || parsed[2] !== "gamma") {
+            throw new Error("Delim parsing failed: " + JSON.stringify(parsed));
+          }
+          return `Parsed 4 keywords using delimiter '${delim}'`;
+        }
+      },
+      {
+        name: "Test 6: Clean Unhighlight & DOM Integrity",
+        run: () => {
+          const origHtml = "<p>First sentence. Second sentence with words.</p>";
+          const $host = $("#sandboxHost").empty().html(origHtml);
+          $host.highlight("sentence", { className: "chrome-extension-FindManyStrings style-0", element: "mh" });
+          $host.highlight("words", { className: "chrome-extension-FindManyStrings style-1", element: "mh" });
+          if ($host.find("mh").length !== 3) throw new Error("Highlighting failed before clear");
+          
+          // Clear all
+          $host.unhighlight({ className: "chrome-extension-FindManyStrings", element: "mh" });
+          if ($host.find("mh").length !== 0) throw new Error("Failed to remove all <mh> elements");
+          
+          // Verify plain text matches original
+          if ($host.text() !== "First sentence. Second sentence with words.") {
+            throw new Error("Text mutated after unhighlighting: " + $host.text());
+          }
+          return "DOM restored to 0 <mh> tags with intact original text";
+        }
+      },
+      {
+        name: "Test 7: Special Character & Regex Safety",
+        run: () => {
+          const $host = $("#sandboxHost").empty().html("<p>Price is $100 for C++ / Node.js & React (v18.0)</p>");
+          $host.highlight("C++", { className: "CE-FMS-spec", element: "mh" });
+          $host.highlight("$100", { className: "CE-FMS-spec", element: "mh" });
+          $host.highlight("(v18.0)", { className: "CE-FMS-spec", element: "mh" });
+          const count = $host.find("mh").length;
+          if (count !== 3) throw new Error("Special character highlights failed. Found: " + count);
+          return "Successfully highlighted symbols ($100, C++, (v18.0)) safely";
+        }
+      },
+      {
+        name: "Test 8: Dynamic Re-Highlighting (Mutation Simulation)",
+        run: () => {
+          const $host = $("#sandboxHost").empty().html("<p>Initial line with target word.</p>");
+          $host.highlight("target", { className: "style-target", element: "mh" });
+          
+          // Dynamically append new content
+          $host.append("<p>Injected second paragraph with target word.</p>");
+          $host.highlight("target", { className: "style-target", element: "mh" });
+          
+          const totalMatches = $host.find("mh").length;
+          if (totalMatches !== 2) throw new Error("Expected 2 matches after mutation, got " + totalMatches);
+          return "Handled dynamic DOM node insertion without re-highlight collision";
+        }
+      },
+      {
+        name: "Test 9: 20-Color Palette Integrity",
+        run: () => {
+          let verified = 0;
+          for (let i = 0; i < 20; i++) {
+            const $el = $(`<span class="chrome-extension-FindManyStrings-style-${i}">Color${i}</span>`).appendTo("#sandboxHost");
+            const bg = window.getComputedStyle($el[0]).backgroundColor;
+            if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
+              verified++;
+            }
+          }
+          if (verified < 20) throw new Error(`Expected 20 styled color themes, verified ${verified}`);
+          return `Verified all 20 distinct highlight color themes actively applied by browser CSS`;
+        }
+      }
+    ];
+
+    function runAllTests() {
+      const $list = $("#testResultsList").empty();
+      let passCount = 0;
+
+      tests.forEach((t, idx) => {
+        const start = performance.now();
+        let passed = false;
+        let detail = "";
+        try {
+          detail = t.run();
+          passed = true;
+          passCount++;
+        } catch (err) {
+          detail = err.message || String(err);
+        }
+        const dur = (performance.now() - start).toFixed(2);
+
+        const html = `
+          <div class="test-item" id="test-row-${idx}">
+            <div class="test-status ${passed ? 'status-pass' : 'status-fail'}">${passed ? '✓' : '✗'}</div>
+            <div class="test-desc">
+              <div class="test-name">${t.name} <span style="font-size:11px; color:#64748b;">(${dur}ms)</span></div>
+              <div class="test-detail">${detail}</div>
+            </div>
+          </div>
+        `;
+        $list.append(html);
+      });
+
+      const $badge = $("#overallBadge");
+      if (passCount === tests.length) {
+        $badge.attr("class", "badge badge-success").text(`ALL ${passCount}/${tests.length} TESTS PASSED`);
+      } else {
+        $badge.attr("class", "badge badge-error").text(`${passCount}/${tests.length} PASSED`);
+      }
+    }
+
+    // --- Interactive Simulator Logic ---
+    function updateHighlights() {
+      const enabled = $("#simToggle").is(":checked");
+      const text = $("#simInput").val();
+      const delim = $("#simDelim").val() || ",";
+      const isWhole = $("#simWholeWord").is(":checked");
+      const isCase = $("#simMatchCase").is(":checked");
+      const isNewline = $("#simNewlineColor").is(":checked");
+
+      const $doc = $("#docContent");
+
+      // 1. Clear existing
+      $doc.unhighlight({ className: "chrome-extension-FindManyStrings", element: "mh" });
+
+      if (!enabled || !text.trim()) {
+        renderChips([]);
+        return;
+      }
+
+      // 2. Parse keywords
+      let keywords = [];
+      if (isNewline) {
+        text.split(/\n/g).filter(Boolean).forEach((line, lineIdx) => {
+          line.split(delim).map(s => s.trim()).filter(Boolean).forEach(kw => {
+            keywords.push({ kwStr: kw, kwGrp: lineIdx % 20 });
+          });
+        });
+      } else {
+        keywords = text.split(delim).map(s => s.trim()).filter(Boolean).map((kw, idx) => {
+          return { kwStr: kw, kwGrp: idx % 20 };
+        });
+      }
+
+      // Render chips
+      renderChips(keywords);
+
+      // 3. Apply highlights to target document
+      keywords.forEach(item => {
+        const cls = `chrome-extension-FindManyStrings chrome-extension-FindManyStrings-style-${item.kwGrp} CE-FMS-${encodeURIComponent(item.kwStr)}`;
+        $doc.highlight(item.kwStr, {
+          className: cls,
+          element: "mh",
+          wordsOnly: isWhole,
+          caseSensitive: isCase
+        });
+      });
+    }
+
+    function renderChips(keywords) {
+      const $chips = $("#simChips").empty();
+      keywords.forEach((item, idx) => {
+        const $chip = $(`
+          <span class="kw-chip chrome-extension-FindManyStrings-style-${item.kwGrp}">
+            <span>${item.kwStr}</span>
+            <span class="del">&times;</span>
+          </span>
+        `);
+        $chip.on("click", function() {
+          removeKeyword(item.kwStr);
+        });
+        $chips.append($chip);
+      });
+    }
+
+    function removeKeyword(targetKw) {
+      const delim = $("#simDelim").val() || ",";
+      const current = $("#simInput").val();
+      const updated = current.split(delim).map(s => s.trim()).filter(s => s !== targetKw).join(delim + " ");
+      $("#simInput").val(updated);
+      updateHighlights();
+    }
+
+    // Event handlers
+    $(document).ready(function() {
+      runAllTests();
+
+      $("#runTestsBtn").on("click", runAllTests);
+
+      $("#simInput, #simDelim").on("input", function() {
+        if ($("#simRealtime").is(":checked")) {
+          updateHighlights();
+        }
+      });
+
+      $("#simToggle, #simWholeWord, #simMatchCase, #simNewlineColor").on("change", updateHighlights);
+
+      $("#simClearBtn").on("click", function() {
+        $("#simInput").val("");
+        updateHighlights();
+      });
+
+      $("#addDynamicContentBtn").on("click", function() {
+        const now = new Date().toLocaleTimeString();
+        $("#dynamicContainer").append(`
+          <p style="padding:8px; background:#f8fafc; border-left:4px solid #38bdf8; margin-top:8px;">
+            [${now}] Dynamically injected block: Testing Chrome runtime performance with fast web queries!
+          </p>
+        `);
+        updateHighlights();
+      });
+
+      $("#resetDocBtn").on("click", function() {
+        $("#dynamicContainer").empty();
+        $("#simInput").val("Chrome, web, performance, fast");
+        updateHighlights();
+      });
+
+      // Initial run
+      updateHighlights();
+    });
+  </script>
+</body>
+</html>
