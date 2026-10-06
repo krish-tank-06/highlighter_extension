@@ -13,6 +13,17 @@ Features:
 ✔️ Whole word, Case-sensitivity Search  
 ✔️ Group words by colors    
 
+## Install in Chrome
+
+1. Download and extract `Multi-Highlight-v2.11.2.zip`, or download this repository and extract it.
+2. Open `chrome://extensions` in Chrome and turn on **Developer mode**.
+3. Select **Load unpacked** and choose the folder containing `manifest.json` (the extracted ZIP folder, or the repository's `src` folder).
+4. Pin **Multi Highlight** from Chrome's Extensions menu, open a regular webpage, and click the extension icon.
+
+The extension also works in Chromium based browsers that support Manifest V3, such as Microsoft Edge. Browser-internal pages and the Chrome Web Store do not allow extensions to change their content. For local development on Windows, `launch_extension.bat` opens Chrome with the extension in a separate test profile.
+
+To create a fresh ZIP for the Chrome Web Store, run `package_extension.ps1` in PowerShell. The ZIP has `manifest.json` at its root. The Web Store submission and publisher review are separate steps.
+
 
 ![screenshot-2](doc/2_screenshot_github.jpg)
 
